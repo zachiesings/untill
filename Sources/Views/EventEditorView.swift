@@ -2,7 +2,7 @@ import SwiftUI
 
 struct EventEditorView: View {
     @EnvironmentObject var model: AppModel
-    @Environment(\.dismiss) private var dismiss
+    let onClose: () -> Void
 
     /// nil when adding a new event; otherwise the event being edited.
     let event: CountdownEvent?
@@ -21,8 +21,9 @@ struct EventEditorView: View {
     private let proEmojis = ["🎈", "🍾", "🌸", "🎁", "💍", "🏖️", "🚀", "⭐️",
                              "🎯", "🩺", "🏠", "💼", "📦", "🐣", "🌙", "☀️"]
 
-    init(event: CountdownEvent?) {
+    init(event: CountdownEvent?, onClose: @escaping () -> Void) {
         self.event = event
+        self.onClose = onClose
         _title = State(initialValue: event?.title ?? "")
         _date = State(initialValue: event?.date ?? Calendar.current.startOfDay(for: Date()))
         _emoji = State(initialValue: event?.emoji ?? "🎉")
@@ -35,7 +36,7 @@ struct EventEditorView: View {
             HStack {
                 Text(isEditing ? "Edit event" : "New event").font(.headline)
                 Spacer()
-                Button { dismiss() } label: {
+                Button { onClose() } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(Color.secondary)
                 }.buttonStyle(.plain)
             }
@@ -82,7 +83,7 @@ struct EventEditorView: View {
                     if isEditing {
                         Button(role: .destructive) {
                             if let e = event { model.store.remove(e) }
-                            dismiss()
+                            onClose()
                         } label: {
                             Text("Delete")
                         }.buttonStyle(.bordered)
@@ -192,6 +193,6 @@ struct EventEditorView: View {
             let new = CountdownEvent(title: cleanTitle, date: day, emoji: emoji, colorIndex: colorIndex)
             model.store.add(new)
         }
-        dismiss()
+        onClose()
     }
 }

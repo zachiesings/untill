@@ -11,24 +11,24 @@ struct MenuView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if showSettings {
+            if showPaywall {
+                PaywallView(onClose: { showPaywall = false })
+                    .environmentObject(model)
+            } else if showSettings {
                 SettingsView(onBack: { showSettings = false },
                              showPaywall: { showSettings = false; showPaywall = true })
+                    .environmentObject(model)
+            } else if showNewEditor {
+                EventEditorView(event: nil, onClose: { showNewEditor = false })
+                    .environmentObject(model)
+            } else if let ev = editorEvent {
+                EventEditorView(event: ev, onClose: { editorEvent = nil })
                     .environmentObject(model)
             } else {
                 main
             }
         }
         .frame(width: 320)
-        .sheet(isPresented: $showPaywall) {
-            PaywallView().environmentObject(model)
-        }
-        .sheet(isPresented: $showNewEditor) {
-            EventEditorView(event: nil).environmentObject(model)
-        }
-        .sheet(item: $editorEvent) { ev in
-            EventEditorView(event: ev).environmentObject(model)
-        }
     }
 
     private var main: some View {
